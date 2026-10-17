@@ -1,3 +1,4 @@
+#pragma once
 #include "AuthService.h"
 #include <openssl/evp.h>
 #include <openssl/rand.h>
