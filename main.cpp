@@ -72,7 +72,7 @@ int main(){
 
         std::cout << std::endl;
     }
-    while(logIn == true){
+  /*  while(logIn == true){
      std::cout << "NEW Release, LOAD previous,or LOG out";
       if (!std::getline(std::cin, line)) {
             std::cout << "Error, try again ";
@@ -118,7 +118,7 @@ int main(){
 
         }
     }
-
+*/
     return 0;
 }
 
