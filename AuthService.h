@@ -5,7 +5,7 @@
 // Independent Sprint 1 prototype. Does not include or alter teammate code.
 class AuthService {
 public:
-    explicit AuthService(std::string filePath);
+    explicit AuthService(std::string filePath = "/accounts.txt");
     bool registerUser(const std::string& username, const std::string& password, std::string& message);
     bool login(const std::string& username, const std::string& password, std::string& message) const;
     bool load(std::string& message);

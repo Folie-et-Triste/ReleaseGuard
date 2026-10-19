@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include "AuthService.cpp"
 
 // Release Readiness & Request feature (Issue #7: Release Request)
 
