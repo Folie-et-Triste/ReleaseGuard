@@ -18,6 +18,7 @@ void report(release r){
 }
 
 int main(){
+    
     std::cout << "=== ReleaseGuard: Readiness Review Demo ===\n\n";
 
     // Scenario 1: NOT ready - critical bug open, a test failing, checklist incomplete.
