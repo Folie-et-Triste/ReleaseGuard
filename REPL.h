@@ -43,7 +43,7 @@ std::string getPass(){
     }
     return nullptr;
 }
-release makeRelease(){
+/*release makeRelease(){
     std::string input;
     std::cout << "Enter Version";
     std::getline(std::cin,input);
@@ -87,4 +87,4 @@ release makeRelease(){
         }
     }
     return entry;
-}
+}*/
