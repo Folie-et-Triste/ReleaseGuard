@@ -1,5 +1,5 @@
-#include "iostream"
-#include "AuthService.cpp"
+#include <iostream>
+#include <string>
 #include <vector>
 
 // Release Readiness feature (Issue #5: Readiness review)
@@ -10,18 +10,30 @@ class bug{
     std::string title;
     std::string severity;   // "Critical", "Major", or "Minor"
     bool resolved;
+
+    bug() : title(""), severity("Minor"), resolved(false) {}
+    bug(std::string t) : title(t), severity("Minor"), resolved(false) {}
+    bug(std::string t, std::string s, bool r) : title(t), severity(s), resolved(r) {}
 };
 
 class testResult{
     public:
     std::string name;
     bool passed;
+
+    testResult() : name(""), passed(false) {}
+    testResult(std::string n) : name(n), passed(false) {}
+    testResult(std::string n, bool p) : name(n), passed(p) {}
 };
 
 class checklistItem{
     public:
     std::string description;
     bool complete;
+
+    checklistItem() : description(""), complete(false) {}
+    checklistItem(std::string d) : description(d), complete(false) {}
+    checklistItem(std::string d, bool c) : description(d), complete(c) {}
 };
 
 class release{
@@ -33,6 +45,7 @@ class release{
     std::vector<checklistItem> checklist;
 
     public:
+    release();
     release(std::string ver);
     void addBug(bug b);
     void addTest(testResult t);
@@ -44,6 +57,11 @@ class release{
     std::vector<std::string> getBlockers();
 };
 
+release::release(){
+    version = "";
+    status = "Draft";
+}
+
 release::release(std::string ver){
     version = ver;
     status = "Draft";
@@ -53,8 +71,6 @@ void release::addBug(bug b){ bugs.push_back(b); }
 void release::addTest(testResult t){ tests.push_back(t); }
 void release::addChecklistItem(checklistItem c){ checklist.push_back(c); }
 
-// A release is ready only if there are no unresolved critical bugs,
-// every test passed, and every checklist item is complete.
 bool release::checkReadinessRules(){
     for(size_t i = 0; i < bugs.size(); i++)
         if(bugs[i].severity == "Critical" && !bugs[i].resolved) return false;
@@ -73,7 +89,6 @@ void release::updateStatus(){
 std::string release::getStatus(){ return status; }
 std::string release::getVersion(){ return version; }
 
-// Returns a readable list of everything blocking the release.
 std::vector<std::string> release::getBlockers(){
     std::vector<std::string> out;
     for(size_t i = 0; i < bugs.size(); i++)
