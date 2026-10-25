@@ -1,3 +1,5 @@
+#include <sstream>
+#include "AuthService.h"
 #include "REPL.h"
 int main(){
     bool logIn = false;
