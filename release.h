@@ -59,6 +59,14 @@ public:
     std::string getStatus();
     std::string getVersion();
     std::vector<std::string> getBlockers();
+
+    void resolveBug(size_t index);
+    void passTest(size_t index);
+    void completeChecklistItem(size_t index);
+
+    std::vector<bug> getBugs();
+    std::vector<testResult> getTests();
+    std::vector<checklistItem> getChecklist();
 };
 
 release::release(std::string ver) {
@@ -125,6 +133,20 @@ std::vector<std::string> release::getBlockers() {
         if (!checklist[i].complete)
             out.push_back("Incomplete checklist item: " + checklist[i].description);
     return out;
+}
+
+std::vector<bug> release::getBugs() { return bugs; }
+std::vector<testResult> release::getTests() { return tests; }
+std::vector<checklistItem> release::getChecklist() { return checklist; }
+
+void release::resolveBug(size_t index) {
+    if (index < bugs.size()) bugs[index].resolved = true;
+}
+void release::passTest(size_t index) {
+    if (index < tests.size()) tests[index].passed = true;
+}
+void release::completeChecklistItem(size_t index) {
+    if (index < checklist.size()) checklist[index].complete = true;
 }
 
 #endif // RELEASE_H
