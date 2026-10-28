@@ -7,8 +7,6 @@ class  user{
     
     user(std::string newName, std::string newPass);
     
-
-
     public:
     std::string name;
     std::string password;

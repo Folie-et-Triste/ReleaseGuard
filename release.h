@@ -7,7 +7,6 @@
 #include <ctime>
 #include "AuthService.cpp"
 
-// Release Readiness & Request feature (Issue #7: Release Request)
 
 class bug {
 public:
@@ -39,6 +38,9 @@ private:
     std::vector<testResult> tests;
     std::vector<checklistItem> checklist;
 
+    std::string reviewedBy;
+    std::string rejectionReason;
+
 public:
     release(std::string ver);
     
@@ -49,6 +51,8 @@ public:
     std::string getRequestedBy();
     std::string getDescription();
     std::string getRequestDate();
+    std::string getReviewedBy();
+    std::string getRejectionReason();
     
     // Domain operations
     void addBug(bug b);
@@ -56,6 +60,10 @@ public:
     void addChecklistItem(checklistItem c);
     bool checkReadinessRules();
     void updateStatus();
+
+    void approveRelease(std::string reviewerName);
+    void rejectRelease(std::string reviewerName, std::string reason);
+    
     std::string getStatus();
     std::string getVersion();
     std::vector<std::string> getBlockers();
@@ -87,6 +95,8 @@ void release::submitReleaseRequest(std::string developerName, std::string desc) 
 std::string release::getRequestedBy() { return requestedBy; }
 std::string release::getDescription() { return description; }
 std::string release::getRequestDate() { return requestDate; }
+std::string release::getReviewedBy() { return reviewedBy; }
+std::string release::getRejectionReason() { return rejectionReason; }
 
 void release::addBug(bug b) { bugs.push_back(b); }
 void release::addTest(testResult t) { tests.push_back(t); }
@@ -125,6 +135,31 @@ std::vector<std::string> release::getBlockers() {
         if (!checklist[i].complete)
             out.push_back("Incomplete checklist item: " + checklist[i].description);
     return out;
+}
+
+void release::approveRelease(std::string reviewerName) {
+    // Solo se puede aprobar si pasa las reglas de readiness (o esta en Submitted/Ready)
+    if (!checkReadinessRules()) {
+        std::cout << "Error: Cannot approve release with active blockers.\n";
+        return;
+    }
+    
+    status = "Approved";
+    reviewedBy = reviewerName;
+    rejectionReason = "N/A";
+    std::cout << "Release " << version << " has been APPROVED by " << reviewerName << ".\n";
+}
+
+void release::rejectRelease(std::string reviewerName, std::string reason) {
+    if (reason.empty()) {
+        std::cout << "Error: A reason must be provided to reject a release.\n";
+        return;
+    }
+    
+    status = "Rejected";
+    reviewedBy = reviewerName;
+    rejectionReason = reason;
+    std::cout << "Release " << version << " has been REJECTED by " << reviewerName << ".\n";
 }
 
 #endif // RELEASE_H
