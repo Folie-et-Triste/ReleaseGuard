@@ -1,0 +1,16 @@
+# Compiled binaries
+main
+releasedemo
+requestdemo
+requestDemo
+*.o
+*.out
+
+# macOS debug symbols
+*.dSYM/
+
+# Local account data created at runtime
+accounts.txt
+
+# Editor/OS cruft
+.DS_Store

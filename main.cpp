@@ -1,3 +1,5 @@
+#include <sstream>
+#include "AuthService.h"
 #include "REPL.h"
 int main(){
     bool logIn = false;
@@ -72,53 +74,42 @@ int main(){
 
         std::cout << std::endl;
     }
-  /*  while(logIn == true){
-     std::cout << "NEW Release, LOAD previous,or LOG out";
-      if (!std::getline(std::cin, line)) {
+    while(logIn == true){
+        std::cout << "\nCommands: new, load, logout\n";
+        if (!std::getline(std::cin, line)) {
             std::cout << "Error, try again ";
-            continue; 
+            continue;
         }
 
-        // Trim leading whitespace
         size_t start = line.find_first_not_of(" \t");
         if (start == std::string::npos) continue;
         line = line.substr(start);
         lowercase(line);
+
         if (line == "quit" || line == "exit") {
             std::cout << "Goodbye!" << std::endl;
             exit(0);
         }
-        if (line == "log"){
+        if (line == "logout") {
             logIn = false;
-        }
-
-       
-        std::istringstream iss(line);
-        std::string input;
-        iss >> input;
-        
-
-        if (input.empty()){
-            std::cout << "Enter NEW, LOAD, or LOG OUT" << std::endl;
-            std::cout << "  Or type 'quit' to exit." << std::endl;
+            std::cout << "Logged out.\n";
             continue;
         }
-
-        // Validate algorithm name
-        if (input != "new" && input != "log"&& input != "load") {
-            std::cout << "Unknown input: " << input << std::endl;
-            std::cout << "Valid commands: new, log in,load"
-                      << std::endl;
+        if (line == "new") {
+            std::cout << "Enter version of release: ";
+            std::string version;
+            std::getline(std::cin, version);
+            release entry(version);
+            manageRelease(entry);
             continue;
         }
-        if (input == "new"){
-            std::cout << "Enter Version of release.\n";
-            std::getline(std::cin,line);
-            release entry(line);
-
+        if (line == "load") {
+            std::cout << "Load is not implemented yet.\n";
+            continue;
         }
+        std::cout << "Unknown input: " << line << "\n";
+        std::cout << "Valid commands: new, load, logout\n";
     }
-*/
     return 0;
 }
 
