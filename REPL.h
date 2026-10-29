@@ -1,4 +1,5 @@
 #include "release.h"
+
 void lowercase(std::string input){
     for (auto&x : input){
         x = tolower(x);
