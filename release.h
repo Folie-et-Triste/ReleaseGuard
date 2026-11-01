@@ -13,6 +13,7 @@ public:
     std::string title;
     std::string severity;   // "Critical", "Major", or "Minor"
     bool resolved;
+    std::string assignee;
 };
 
 class testResult {
@@ -168,6 +169,8 @@ void release::rejectRelease(std::string reviewerName, std::string reason) {
     reviewedBy = reviewerName;
     rejectionReason = reason;
     std::cout << "Release " << version << " has been REJECTED by " << reviewerName << ".\n";
+}
+
 std::vector<bug> release::getBugs() { return bugs; }
 std::vector<testResult> release::getTests() { return tests; }
 std::vector<checklistItem> release::getChecklist() { return checklist; }
