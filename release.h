@@ -13,6 +13,7 @@ public:
     std::string title;
     std::string severity;   // "Critical", "Major", or "Minor"
     bool resolved;
+    std::string assignee;
 };
 
 class testResult {
@@ -51,6 +52,9 @@ public:
     std::string getRequestedBy();
     std::string getDescription();
     std::string getRequestDate();
+    void setStatus(std::string s);
+    void setRequestedBy(std::string s);
+    void setDescription(std::string s);
     std::string getReviewedBy();
     std::string getRejectionReason();
     
@@ -103,6 +107,9 @@ void release::submitReleaseRequest(std::string developerName, std::string desc) 
 std::string release::getRequestedBy() { return requestedBy; }
 std::string release::getDescription() { return description; }
 std::string release::getRequestDate() { return requestDate; }
+void release::setStatus(std::string s) { status = s; }
+void release::setRequestedBy(std::string s) { requestedBy = s; }
+void release::setDescription(std::string s) { description = s; }
 std::string release::getReviewedBy() { return reviewedBy; }
 std::string release::getRejectionReason() { return rejectionReason; }
 
@@ -168,6 +175,8 @@ void release::rejectRelease(std::string reviewerName, std::string reason) {
     reviewedBy = reviewerName;
     rejectionReason = reason;
     std::cout << "Release " << version << " has been REJECTED by " << reviewerName << ".\n";
+}
+
 std::vector<bug> release::getBugs() { return bugs; }
 std::vector<testResult> release::getTests() { return tests; }
 std::vector<checklistItem> release::getChecklist() { return checklist; }
