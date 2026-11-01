@@ -1,6 +1,7 @@
 #include <sstream>
 #include "AuthService.h"
 #include "REPL.h"
+#include "persistence.h"
 int main(){
     bool logIn = false;
     std::string line;
@@ -74,6 +75,7 @@ int main(){
 
         std::cout << std::endl;
     }
+    std::vector<release> releases = loadReleases();
     while(logIn == true){
         std::cout << "\nCommands: new, load, logout\n";
         if (!std::getline(std::cin, line)) {
@@ -101,10 +103,21 @@ int main(){
             std::getline(std::cin, version);
             release entry(version);
             manageRelease(entry);
+            releases.push_back(entry);
+            saveReleases(releases);
             continue;
         }
         if (line == "load") {
-            std::cout << "Load is not implemented yet.\n";
+            if (releases.empty()) { std::cout << "No saved releases.\n"; continue; }
+            std::cout << "Saved releases:\n";
+            for (size_t i = 0; i < releases.size(); i++)
+                std::cout << "  [" << i << "] " << releases[i].getVersion()
+                          << " [" << releases[i].getStatus() << "]\n";
+            std::cout << "Index to open: ";
+            std::string n; std::getline(std::cin, n);
+            size_t idx = (size_t)std::stoi(n);
+            if (idx < releases.size()) { manageRelease(releases[idx]); saveReleases(releases); }
+            else std::cout << "Invalid index.\n";
             continue;
         }
         std::cout << "Unknown input: " << line << "\n";

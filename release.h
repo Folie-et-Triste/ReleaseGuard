@@ -52,6 +52,9 @@ public:
     std::string getRequestedBy();
     std::string getDescription();
     std::string getRequestDate();
+    void setStatus(std::string s);
+    void setRequestedBy(std::string s);
+    void setDescription(std::string s);
     std::string getReviewedBy();
     std::string getRejectionReason();
     
@@ -104,6 +107,9 @@ void release::submitReleaseRequest(std::string developerName, std::string desc) 
 std::string release::getRequestedBy() { return requestedBy; }
 std::string release::getDescription() { return description; }
 std::string release::getRequestDate() { return requestDate; }
+void release::setStatus(std::string s) { status = s; }
+void release::setRequestedBy(std::string s) { requestedBy = s; }
+void release::setDescription(std::string s) { description = s; }
 std::string release::getReviewedBy() { return reviewedBy; }
 std::string release::getRejectionReason() { return rejectionReason; }
 
