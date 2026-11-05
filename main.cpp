@@ -77,7 +77,7 @@ int main(){
             if(matches[1] == "new"){
                 std::string releaseName = matches[2];
                currentReleases.push_back(makeRelease());
-                logActivity(currentUser, "created release " + version);
+                logActivity(currentUser, "created release " + releaseName);
             }
             
         }
