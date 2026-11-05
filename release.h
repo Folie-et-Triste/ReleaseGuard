@@ -14,22 +14,56 @@ public:
     std::string severity;   // "Critical", "Major", or "Minor"
     bool resolved;
     std::string assignee;
+    bug(std::string newTitle, std::string newSever, bool resolve);
+    bug();
 };
+bug::bug(){
+    title = "";
+    severity = "";
+    resolved = false;
+    assignee = "";
+}
+bug::bug(std::string newTitle, std::string newSever, bool resolve){
+    title = newTitle;
+    severity = newSever;
+    resolved = resolve;
+    assignee = "";
 
+}
 class testResult {
 public:
     std::string name;
     bool passed;
+testResult(std::string newName, bool pass);
+testResult();
 };
-
+testResult::testResult(){
+    name = "";
+    passed = false;
+}
+testResult::testResult(std::string newName, bool pass){
+    name = newName;
+    passed = pass;
+}
 class checklistItem {
 public:
     std::string description;
     bool complete;
+    checklistItem(std::string newDesc, bool newComplete);
+    checklistItem();
 };
+checklistItem::checklistItem(){
+    description = "";
+    complete = false;
+}
+checklistItem::checklistItem(std::string newDesc, bool newComplete){
+    description = newDesc;
+    complete = newComplete;
+}
 
 class release {
 private:
+    std::string name;
     std::string version;
     std::string status;        // "Draft", "Submitted", "Ready", "Approved", "Rejected"
     std::string requestedBy;   // Developer who created the release request

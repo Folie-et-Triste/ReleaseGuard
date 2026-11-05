@@ -1,11 +1,22 @@
 #include "release.h"
+#include <regex>
+class REPL{
+public:
+static const std::regex start;
+static const std::regex release;
+static const std::regex bugs;
+static const std::regex test;
+static const std::regex check;
+
+
+};
 
 void lowercase(std::string input){
     for (auto&x : input){
         x = tolower(x);
     }
 }
-std::string getUser(){
+/*std::string getUser(){
     std::string line = "";
 
     while(line != "exit"){
@@ -43,52 +54,63 @@ std::string getPass(){
         return line;
     }
     return nullptr;
-}
-/*release makeRelease(){
+}*/
+
+release makeRelease(){
     std::string input;
+    std::smatch matches;
     std::cout << "Enter Version";
     std::getline(std::cin,input);
     release entry(input);
     while(input != "finish"){
-        std::cout << "Add bug, test, checklist, or finish";
+        std::cout << "Add bugs <title> <severity> or type 'finish'";
         if (!std::getline(std::cin, input)) {
             std::cout << "Error, try again ";
             continue; 
         }
 
-        // Trim leading whitespace
-        size_t start = input.find_first_not_of(" \t");
-        if (start == std::string::npos) continue;
-        input = input.substr(start);
-        lowercase(input);
-        if (input == "finish") {
-            break;
-        }
-        if( input == "bug"){
-            std::cout << "Enter <Title> <Serverity>";
-            std::getline(std::cin, input);
-            std::istringstream iss(input);
-        std::string title, serv;
-        iss >>title >> serv;
-        bug newbug(title,serv,false);
+       if (regex_search(input,matches,REPL::bugs) && regex_match(input,REPL::bugs)){
+        bug newbug(matches[1],matches[2],false);
         entry.addBug(newbug);
-        }
-        if(input == "test"){
-            std::cout << "Enter <name>";
-            std::getline(std::cin,input);
-            testResult newTest(input);
-            entry.addTest(newTest);
 
         }
-        if (input == "checklist"){
-            std::cout << "Enter <Discription>";
-            std::getline(std::cin,input);
-            checklistItem newCheck(input);
-            entry.addChecklistItem(newCheck);
+        else{
+            std::cout << "Error, incorrect input";
+        }
+    }input = "";
+    while(input != "finish"){
+   
+       std::cout << "Add tests <title> or type 'finish'";
+        if (!std::getline(std::cin, input)) {
+            std::cout << "Error, try again ";
+            continue; 
+        }
+
+       if (regex_search(input,matches,REPL::test)&& regex_match(input,REPL::test)){
+        testResult newtest(matches[1],false);
+        entry.addTest(newtest);
+
+        }else{
+            std::cout << "Error, incorrect input";
+        }
+        }input = "";
+    while(input != "finish"){
+         std::cout << "Add checklist item <title> or type 'finish'";
+        if (!std::getline(std::cin, input)) {
+            std::cout << "Error, try again ";
+            continue; 
+        }
+
+       if (regex_search(input,matches,REPL::check)&& regex_match(input,REPL::test)){
+        checklistItem newcheck(matches[1],false);
+        entry.addChecklistItem(newcheck);
+
+        }else{
+            std::cout << "Error, incorrect input";
         }
     }
     return entry;
-}*/
+}
 // Release management menu: add bugs/tests/checklist items, mark them done,
 // and run the readiness check from inside the REPL.
 void manageRelease(release &entry){

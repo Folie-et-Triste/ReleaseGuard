@@ -2,127 +2,87 @@
 #include "AuthService.h"
 #include "REPL.h"
 #include "persistence.h"
+const std::regex REPL::start("([A-Za-z]*) (\\w*) (\\w*)");
+const std::regex REPL::release("([a-z]*) (\\w*)");
+const std::regex REPL::bugs("([a-z]*) (Critcal|Major|Minor)");
+const std::regex REPL::test("([a-z]*) ([a-z]*)");
+const std::regex REPL::check("([a-z]*) ([a-z]*)");
+std::smatch matches;
+std::vector<release> currentReleases;
 int main(){
+    std::string currentUser;
     bool logIn = false;
+    std::string message;
     std::string line;
     std::string filePath = "accounts.txt";
      AuthService Auth(filePath);
     while (logIn == false) {
-        std::cout << "Register or Log in ";
+        std::cout << "Register or Login ";
+        std::cout <<"Format: <Choice> <Username> <Password>";
         if (!std::getline(std::cin, line)) {
             std::cout << "Error, try again ";
             continue; 
         }
 
-        // Trim leading whitespace
-        size_t start = line.find_first_not_of(" \t");
-        if (start == std::string::npos) continue;
-        line = line.substr(start);
-        lowercase(line);
+        
         if (line == "quit" || line == "exit") {
             std::cout << "Goodbye!" << std::endl;
             exit(0);
         }
-        
-        // Parse command: <algorithm> <field>
-        std::istringstream iss(line);
-        std::string input;
-        iss >> input;
-        
-
-        if (input.empty()){
-            std::cout << "You must register or log in to continue" << std::endl;
-            std::cout << "  Or type 'quit' to exit." << std::endl;
-            continue;
-        }
-
-        // Validate algorithm name
-        if (input != "register" && input != "log") {
-            std::cout << "Unknown input: " << input << std::endl;
-            std::cout << "Valid commands: register, log in"
-                      << std::endl;
-            continue;
-        }
-
-    
-        std::string message = "";
-        if (input == "register"){
-            std::string username = getUser();
-            std::string pass = getPass(); 
-        
-        if(Auth.registerUser(username,pass,message)){
+        std::regex_search(line,matches,REPL::start);
+        if(matches.size()){
+          std::string input = matches[1];
+          lowercase(input);
+           if(input == "login"){
+            logIn = (Auth.login(matches[2], matches[3] , message));
             std::cout << message;
             continue;
-
+           }else if(input == "register"){
+          
+            logIn = Auth.registerUser(matches[2],matches[3],message);
+            std::cout << message;
+            continue;
+ 
         }else{
-            std::cout << message <<"\n Try Again or type exit";
+            std::cout << "enter valid command";
             continue;
-        }
-    
-        }
-        if(input == "log"){
-            std::string username = getUser();
-            std::string pass = getPass();
-            logIn = (Auth.login(username, pass, message));
-            std::cout << message;
-                
-
-             
-        }
-
-
-
-
-        std::cout << std::endl;
+        }} std::cout << std::endl;
     }
-    std::vector<release> releases = loadReleases();
     while(logIn == true){
-        std::cout << "\nCommands: new, load, logout\n";
+        currentUser = matches[2];
+       std::cout << "\nEnter Commands: \n new <Release Name>\nsave\nload\nlogout\nquit\n";
+       
         if (!std::getline(std::cin, line)) {
             std::cout << "Error, try again ";
-            continue;
+            continue; 
         }
-
-        size_t start = line.find_first_not_of(" \t");
-        if (start == std::string::npos) continue;
-        line = line.substr(start);
         lowercase(line);
-
-        if (line == "quit" || line == "exit") {
+        std::regex_search(line,matches,REPL::release);
+        if(matches.size() == 0){
+            if (line == "quit" || line == "exit") {
             std::cout << "Goodbye!" << std::endl;
             exit(0);
-        }
-        if (line == "logout") {
+        }else if(line == "logout"){
             logIn = false;
-            std::cout << "Logged out.\n";
-            continue;
+        }else if(line == "save"){
+            saveReleases(currentReleases);
+            std::cout << "Saved Current Releases";
+        }else if(line == "load"){
+            currentReleases = loadReleases();
+            std::cout << "Loadded Releases";
         }
-        if (line == "new") {
-            std::cout << "Enter version of release: ";
-            std::string version;
-            std::getline(std::cin, version);
-            release entry(version);
-            manageRelease(entry);
-            releases.push_back(entry);
-            saveReleases(releases);
-            continue;
+        }else{
+            if(matches[1] == "new"){
+                std::string releaseName = matches[2];
+               currentReleases.push_back(makeRelease());
+
+            }
+            
         }
-        if (line == "load") {
-            if (releases.empty()) { std::cout << "No saved releases.\n"; continue; }
-            std::cout << "Saved releases:\n";
-            for (size_t i = 0; i < releases.size(); i++)
-                std::cout << "  [" << i << "] " << releases[i].getVersion()
-                          << " [" << releases[i].getStatus() << "]\n";
-            std::cout << "Index to open: ";
-            std::string n; std::getline(std::cin, n);
-            size_t idx = (size_t)std::stoi(n);
-            if (idx < releases.size()) { manageRelease(releases[idx]); saveReleases(releases); }
-            else std::cout << "Invalid index.\n";
-            continue;
-        }
-        std::cout << "Unknown input: " << line << "\n";
-        std::cout << "Valid commands: new, load, logout\n";
+    
+
+        
+        
     }
     return 0;
 }
-
