@@ -2,8 +2,10 @@
 #include "AuthService.h"
 #include "REPL.h"
 #include "persistence.h"
+#include "activity.h"
 int main(){
     bool logIn = false;
+    std::string currentUser;
     std::string line;
     std::string filePath = "accounts.txt";
      AuthService Auth(filePath);
@@ -65,6 +67,7 @@ int main(){
             std::string pass = getPass();
             logIn = (Auth.login(username, pass, message));
             std::cout << message;
+            if (logIn) { currentUser = username; logActivity(currentUser, "logged in"); }
                 
 
              
@@ -77,7 +80,7 @@ int main(){
     }
     std::vector<release> releases = loadReleases();
     while(logIn == true){
-        std::cout << "\nCommands: new, load, logout\n";
+        std::cout << "\nCommands: new, load, dashboard, history, logout\n";
         if (!std::getline(std::cin, line)) {
             std::cout << "Error, try again ";
             continue;
@@ -93,6 +96,7 @@ int main(){
             exit(0);
         }
         if (line == "logout") {
+            logActivity(currentUser, "logged out");
             logIn = false;
             std::cout << "Logged out.\n";
             continue;
@@ -105,6 +109,7 @@ int main(){
             manageRelease(entry);
             releases.push_back(entry);
             saveReleases(releases);
+            logActivity(currentUser, "created release " + version);
             continue;
         }
         if (line == "load") {
@@ -116,12 +121,22 @@ int main(){
             std::cout << "Index to open: ";
             std::string n; std::getline(std::cin, n);
             size_t idx = (size_t)std::stoi(n);
-            if (idx < releases.size()) { manageRelease(releases[idx]); saveReleases(releases); }
+            if (idx < releases.size()) { manageRelease(releases[idx]); saveReleases(releases); logActivity(currentUser, "opened release " + releases[idx].getVersion()); }
             else std::cout << "Invalid index.\n";
             continue;
         }
+        if (line == "dashboard") {
+            if (releases.empty()) { std::cout << "No releases yet.\n"; continue; }
+            std::cout << "Release Dashboard:\n";
+            for (size_t i = 0; i < releases.size(); i++)
+                std::cout << "  " << releases[i].getVersion()
+                          << " [" << releases[i].getStatus() << "] - "
+                          << releases[i].getBlockers().size() << " unresolved issue(s)\n";
+            continue;
+        }
+        if (line == "history") { printActivity(); continue; }
         std::cout << "Unknown input: " << line << "\n";
-        std::cout << "Valid commands: new, load, logout\n";
+        std::cout << "Valid commands: new, load, dashboard, history, logout\n";
     }
     return 0;
 }
