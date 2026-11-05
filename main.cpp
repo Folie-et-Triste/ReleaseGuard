@@ -2,6 +2,7 @@
 #include "AuthService.h"
 #include "REPL.h"
 #include "persistence.h"
+#include "activity.h"
 const std::regex REPL::start("([A-Za-z]*) (\\w*) (\\w*)");
 const std::regex REPL::release("([a-z]*) (\\w*)");
 const std::regex REPL::bugs("([a-z]*) (Critcal|Major|Minor)");
@@ -10,9 +11,9 @@ const std::regex REPL::check("([a-z]*) ([a-z]*)");
 std::smatch matches;
 std::vector<release> currentReleases;
 int main(){
-    std::string currentUser;
     bool logIn = false;
     std::string message;
+    std::string currentUser;
     std::string line;
     std::string filePath = "accounts.txt";
      AuthService Auth(filePath);
@@ -63,6 +64,7 @@ int main(){
             std::cout << "Goodbye!" << std::endl;
             exit(0);
         }else if(line == "logout"){
+            logActivity(currentUser, "logged out");
             logIn = false;
         }else if(line == "save"){
             saveReleases(currentReleases);
@@ -75,7 +77,7 @@ int main(){
             if(matches[1] == "new"){
                 std::string releaseName = matches[2];
                currentReleases.push_back(makeRelease());
-
+                logActivity(currentUser, "created release " + version);
             }
             
         }
