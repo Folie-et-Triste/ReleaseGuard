@@ -16,45 +16,6 @@ void lowercase(std::string input){
         x = tolower(x);
     }
 }
-/*std::string getUser(){
-    std::string line = "";
-
-    while(line != "exit"){
-   
-    std::cout << "Enter username\n";
-    if (!std::getline(std::cin, line)) {
-       std::cout <<  "Error: Enter username or exit to quit \n";
-            continue;
-        }
-
-        // Trim leading whitespace
-        size_t start = line.find_first_not_of(" \t");
-        if (start == std::string::npos) 
-        line = line.substr(start);
-        return line;
-    }
-    return nullptr;
-        
-}
-std::string getPass(){
-      std::string line = "";
-
-    while(line != "exit"){
-   
-    std::cout << "Enter password\n";
-    if (!std::getline(std::cin, line)) {
-       std::cout <<  "Error: Enter password or exit to quit\n";
-            continue;
-        }
-
-        // Trim leading whitespace
-        size_t start = line.find_first_not_of(" \t");
-        if (start == std::string::npos) 
-        line = line.substr(start);
-        return line;
-    }
-    return nullptr;
-}*/
 
 release makeRelease(){
     std::string input;
@@ -111,13 +72,12 @@ release makeRelease(){
     }
     return entry;
 }
-// Release management menu: add bugs/tests/checklist items, mark them done,
-// and run the readiness check from inside the REPL.
+
 void manageRelease(release &entry){
     std::string line;
     while(true){
         std::cout << "\nRelease " << entry.getVersion() << " [" << entry.getStatus() << "]\n";
-        std::cout << "Commands: bug, test, checklist, list, resolve, pass, complete, check, done\n";
+        std::cout << "Commands: bug, test, checklist, list, resolve, pass, complete, check, approve, reject, done\n";
         if(!std::getline(std::cin, line)) return;
         size_t start = line.find_first_not_of(" \t");
         if(start == std::string::npos) continue;
@@ -192,6 +152,24 @@ void manageRelease(release &entry){
                 std::cout << "Approval blocked by:\n";
                 for(size_t i=0;i<bl.size();i++) std::cout << "  - " << bl[i] << "\n";
             }
+        }
+        else if(line == "approve"){
+            entry.updateStatus();
+            if(entry.getStatus() == "Ready"){
+                std::string rv;
+                std::cout << "Reviewer name: "; std::getline(std::cin, rv);
+                entry.approveRelease(rv);
+                std::cout << "Approved by " << rv << ".\n";
+            } else {
+                std::cout << "Cannot approve: release is not ready.\n";
+            }
+        }
+        else if(line == "reject"){
+            std::string rv, rs;
+            std::cout << "Reviewer name: "; std::getline(std::cin, rv);
+            std::cout << "Reason: "; std::getline(std::cin, rs);
+            entry.rejectRelease(rv, rs);
+            std::cout << "Rejected.\n";
         }
         else {
             std::cout << "Unknown command.\n";
