@@ -18,6 +18,7 @@ int main(){
     std::string line;
     std::string filePath = "accounts.txt";
     AuthService Auth(filePath);
+    Auth.load(message);
 
     while (logIn == false) {
         std::cout << "Register or Login ";
