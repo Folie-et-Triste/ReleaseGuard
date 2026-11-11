@@ -1,0 +1,8 @@
+{
+  "name": "releaseguard-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ReleaseGuard web app: release readiness management with a web UI",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}
