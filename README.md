@@ -1,101 +1,95 @@
-# ReleaseGuard
+# ReleaseGuard Web
 
-A command line tool that helps a team decide whether a software release is ready to ship. It tracks the bugs, test results, and checklist items for a release and reports whether the release is ready, listing anything that is still blocking it.
+A web version of ReleaseGuard. It tracks the defects, test results, and checklist items for a release and decides whether the release is ready to ship, with a graphical interface, real login, and persistent storage.
 
 ## What it does
 
-- Register and log in. Passwords are stored as salted hashes, not plain text.
-- Create a release and manage it from a menu: add bugs with a severity and assignee, record test results, and add checklist items.
-- Run a readiness check. A release is Not Ready while any critical bug is unresolved, any test has failed, or any checklist item is incomplete. When it is Not Ready, the app lists each blocker.
-- Approve or reject a release. Approval is allowed only when the readiness check passes, and a rejection records a reason.
-- Save and load releases to a file, so work is kept between runs.
-- View a dashboard of all releases with their status and a count of unresolved issues.
-- View an activity history of who did what and when.
+- Register and log in. Passwords are hashed with Argon2id and never stored in plain text.
+- Create a release and manage it: add defects with a severity and assignee, record test results, and add checklist items.
+- The server runs the readiness check. A release is Not Ready while any critical defect is unresolved, any test is failing, or any checklist item is incomplete, and it lists each blocker.
+- Approve or reject a release. The server blocks approval until the release is ready, and a rejection records a reason.
+- Data persists to a file, so it survives a restart and is shared between everyone using the server.
+- An activity log records who did what and when.
 
-## Requirements
+## Technology
 
-- A C++17 compiler (g++).
-- OpenSSL, used for password hashing. On macOS the Makefile finds Homebrew's OpenSSL automatically. On Linux, install the OpenSSL development package (for example, `libssl-dev`).
+- Backend: Node.js with the built-in `http` module, plus `argon2` for password hashing.
+- Storage: a JSON file (`data.json`).
+- Frontend: a single HTML page with vanilla JavaScript, styled after GitHub's Primer design.
 
-## Build
+## Password and login policy
 
-Build the application:
+Implemented in the app:
 
-```
-make
-```
+- Passwords must be 15 to 128 characters. Any characters are allowed, including spaces, so passphrases work.
+- The app rejects passwords that are a common/guessable value, that match the username, or that contain the application name.
+- Passwords are hashed with Argon2id (a unique random salt and work factor per password) and are never stored or logged in plain text.
+- Login is rate limited: after repeated failures from the same client, further attempts are temporarily blocked with a growing delay.
+- Login errors are generic and identical for a wrong password and an unknown username, so they do not reveal whether an account exists. A matching delay is applied to unknown usernames so timing does not reveal it either.
+- Usernames are case-insensitive.
+- The password fields use standard autocomplete attributes, so password managers, autofill, and pasting work.
+- Passwords do not expire on a schedule.
 
-Build the standalone demos:
+Handled by the hosting platform or left for future work (not in this app):
 
-```
-make demos
-```
+- HTTPS is provided by the host (Railway and Vercel terminate TLS at the edge). Run behind HTTPS in production.
+- Password reset links, change notifications, session invalidation after reset, and multi-factor authentication are not implemented.
 
-Remove the built binaries:
+## Run locally
 
-```
-make clean
-```
-
-## Run
-
-```
-./main
-```
-
-## Using the app
-
-At the first prompt, register or log in. The format is one line with three words:
+Requires Node.js 18 or newer.
 
 ```
-register yourname yourpassword
-login yourname yourpassword
+npm start
 ```
 
-Once logged in, the available commands are:
+Then open http://localhost:3000. The server reads its port from the `PORT` environment variable and defaults to 3000.
+
+## Run with Docker
 
 ```
-new <ReleaseName>    create a release and open its menu
-dashboard            list every release with status and unresolved count
-history              show the activity log
-save                 save all releases to file
-load                 load releases from file
-logout               log out
-quit                 exit
+docker build -t releaseguard-web .
+docker run -p 3000:3000 releaseguard-web
 ```
 
-Name a release without dots, for example `new v120`, because the input parser stops at a dot.
+Then open http://localhost:3000.
 
-Inside a release, the menu commands are:
+To keep data across container restarts, mount a volume for the data file:
 
 ```
-bug          add a bug (title, severity, assignee)
-test         add a test (starts as failing)
-checklist    add a checklist item (starts incomplete)
-list         show all items with their index numbers
-resolve      mark a bug resolved by index
-pass         mark a test passed by index
-complete     mark a checklist item complete by index
-check        run the readiness check and show any blockers
-approve      approve the release if it is ready
-reject       reject the release with a reason
-done         save and return to the main menu
+docker run -p 3000:3000 -v $(pwd)/data:/app/data -e DATA_FILE=/app/data/data.json releaseguard-web
 ```
+
+## API
+
+All endpoints under `/api`. Endpoints other than register and login require an `Authorization: Bearer <token>` header, where the token comes from register or login.
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| POST | /api/register | Create an account, returns a token |
+| POST | /api/login | Log in, returns a token |
+| GET | /api/releases | List releases with state and open-check count |
+| POST | /api/releases | Create a release |
+| GET | /api/releases/:id | One release with its items and readiness |
+| POST | /api/releases/:id/bugs | Add a defect |
+| POST | /api/releases/:id/tests | Add a test |
+| POST | /api/releases/:id/checklist | Add a checklist item |
+| POST | /api/releases/:id/bugs/:bid/resolve | Resolve a defect |
+| POST | /api/releases/:id/tests/:tid/pass | Mark a test passing |
+| POST | /api/releases/:id/checklist/:cid/complete | Complete a checklist item |
+| POST | /api/releases/:id/approve | Approve (blocked unless ready) |
+| POST | /api/releases/:id/reject | Reject with a reason |
+| GET | /api/activity | Activity log |
 
 ## Files
 
-- `main.cpp` runs the login and command loops.
-- `REPL.h` holds the in-release menu (`manageRelease`).
-- `release.h` defines the release, bug, test, and checklist types and the readiness rules.
-- `AuthService.cpp` and `AuthService.h` handle registration and login.
-- `persistence.h` saves and loads releases to `releases.txt`.
-- `activity.h` writes and reads the activity log in `activity.txt`.
-- `releaseDemo.cpp` and `requestDemo.cpp` are standalone demos of the core logic.
+- `server.js` runs the HTTP server, the API, and the storage.
+- `public/index.html` is the whole front end.
+- `package.json` defines the start script.
+- `Dockerfile` builds the container image.
 
-## Data files
+## Notes
 
-The app writes `accounts.txt`, `releases.txt`, and `activity.txt` in the working directory. These are ignored by git.
-
-## Continuous integration
-
-A GitHub Actions workflow builds the application and the demos on every push and pull request.
+- Session tokens are kept in memory, so everyone is signed out when the server restarts. The stored data (users, releases, activity) is not affected.
+- The readiness rule matches the original C++ ReleaseGuard logic.
+- `argon2` is a native module, so the Dockerfile runs `npm install` during the build. Running locally also needs `npm install` first.
